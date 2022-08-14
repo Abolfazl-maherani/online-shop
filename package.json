@@ -1,0 +1,27 @@
+{
+  "name": "online-shop",
+  "version": "1.0.0",
+  "description": "online shop with node.js(express, mongodb, mongoose, sooket.io, graphQL )",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abolfazl-maherani/online-shop.git"
+  },
+  "keywords": [
+    "online-shop"
+  ],
+  "author": "abolfazl maherani",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Abolfazl-maherani/online-shop/issues"
+  },
+  "homepage": "https://github.com/Abolfazl-maherani/online-shop#readme",
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "mongoose": "^6.5.2"
+  }
+}
