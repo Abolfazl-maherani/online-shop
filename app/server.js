@@ -1,6 +1,8 @@
 const express = require("express");
+const morgan = require("morgan");
 const { dirname } = require("path");
 const path = require("path");
+const createError = require("http-errors");
 const app = express(express);
 class Server {
   constructor(dbUri) {
@@ -12,6 +14,7 @@ class Server {
   }
   configApp() {
     const PATH = require("path");
+
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(
@@ -19,6 +22,7 @@ class Server {
         PATH.join(PATH.dirname(require.main.filename), process.env.STATIC_DIR)
       )
     );
+    app.use(morgan("dev"));
   }
   configServerListener() {
     const port = process.env.PORT | 8000;
@@ -29,8 +33,18 @@ class Server {
   configDatabase(uri) {
     const mongoose = require("mongoose");
     mongoose.connect(uri, (err) => {
-      if (err) return console.log(err);
-      console.log("db connected succesfull");
+      if (err) return console.log(err.message);
+    });
+    mongoose.connection.on("connected", () => {
+      console.log("mongoose connected to db");
+    });
+    mongoose.connection.on("disconnected", () => {
+      console.log("mongoose disconnected to db");
+    });
+    process.on("SIGINT", async () => {
+      const result = await mongoose.connection.close();
+      if (result) console.log(result);
+      process.exit(0);
     });
   }
 
@@ -40,29 +54,28 @@ class Server {
     this.#notFind();
   }
   configErrorHandler() {
-    app.use((err, req, res) => {
+    app.use((err, req, res, next) => {
+      const createInternalError = createError.InternalServerError("خطای سرور");
       const {
-        message = "خطای سرور رخ داده است",
+        message = createInternalError.message,
         success = false,
-        status = 500,
+        status = createInternalError.status,
       } = err;
       process.env.NODE_ENV === "development" ? console.log(err) : null;
       return res.json({
-        status,
-        message,
-        success,
+        errors: {
+          status,
+          message,
+          success,
+        },
       });
     });
   }
 
   #notFind() {
-    app.use((req, res, next) => {
-      return res.json({
-        status: 404,
-        message: "صفحه ی مورد نظر یافت نشد",
-        success: false,
-      });
-    });
+    app.use((req, res, next) =>
+      next(createError.NotFound("صفحه مورد نظر پیدا نشد"))
+    );
   }
 }
 module.exports = Server;
