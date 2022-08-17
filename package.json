@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "develop": "nodemon app.js"
+    "dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,8 @@
     "http-errors": "^2.0.0",
     "joi": "^17.6.0",
     "mongoose": "^6.5.2",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "swagger-jsdoc": "^6.2.5",
+    "swagger-ui-express": "^4.5.0"
   }
 }

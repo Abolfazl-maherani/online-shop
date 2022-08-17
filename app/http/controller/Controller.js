@@ -1,3 +1,3 @@
-class Controller {
+module.exports = class Controller {
   constructor() {}
-}
+};

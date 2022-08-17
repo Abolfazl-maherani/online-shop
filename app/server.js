@@ -1,9 +1,10 @@
 const express = require("express");
 const morgan = require("morgan");
-const { dirname } = require("path");
-const path = require("path");
 const createError = require("http-errors");
 const app = express(express);
+const swaggerUi = require("swagger-ui-express");
+const swaggerJsDoc = require("swagger-jsdoc");
+
 class Server {
   constructor(dbUri) {
     this.configApp();
@@ -22,6 +23,7 @@ class Server {
         PATH.join(PATH.dirname(require.main.filename), process.env.STATIC_DIR)
       )
     );
+    // morgan.token("");
     app.use(morgan("dev"));
   }
   configServerListener() {
@@ -51,6 +53,27 @@ class Server {
   configRoutes() {
     const routes = require("./http/routes");
     app.use(routes);
+    app.use(
+      "/swagger-api",
+      swaggerUi.serve,
+      swaggerUi.setup(
+        swaggerJsDoc({
+          swaggerDefinition: {
+            info: {
+              title: "Online shop",
+              version: "1.0.0",
+              description: "فروشگاه آنلاین با نود جی اس و اکسپرس",
+            },
+          },
+          apis: ["./app/http/routes/*/*.js"],
+          Server: [
+            {
+              url: "http://localhost" + process.env.PORT,
+            },
+          ],
+        })
+      )
+    );
     this.#notFind();
   }
   configErrorHandler() {
@@ -62,7 +85,7 @@ class Server {
         status = createInternalError.status,
       } = err;
       process.env.NODE_ENV === "development" ? console.log(err) : null;
-      return res.json({
+      return res.status(status).json({
         errors: {
           status,
           message,
