@@ -45,6 +45,7 @@ const schema = new Schema(
     bills: { type: [], default: [] },
     discount: { type: Number, default: 0 },
     birthday: { type: Date },
+    status: { type: String, enum: ["ACTIVE", "DEACTIVE"], default: "DEACTIVE" },
     roles: {
       type: String,
       enum: ["USER", "ADMIN"],

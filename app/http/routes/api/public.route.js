@@ -6,10 +6,10 @@ const router = require("express").Router();
  *   get:
  *     tags: [public]
  *     summary: index
- *     description: get all required data
+ *     description: Get information for api
  *     responses:
  *       200:
- *         description: Returns response in a json
+ *         description: Return name Api and version
  *       404:
  *         description: Returns an error object key in json
  */

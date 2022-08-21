@@ -5,6 +5,7 @@ const { phoneIsValid, normalizePhone } = require("../functions");
 class IpPanel {
   #apiKey;
   _statusOk = "OK";
+  _pattern = null;
 
   constructor(apiKey, fromNumber = "+983000505") {
     if (!typeof apiKey === "string") return;
@@ -82,7 +83,11 @@ class IpPanel {
     };
     return endPoint;
   }
-
+  setPttern(pattern) {
+    if (!pattern || typeof pattern !== "string")
+      throw "pattern must be a string";
+    return (this._pattern = pattern);
+  }
   async InboxMessages(page = 0, limit = 10) {
     try {
       if (!Number.isInteger(page) && !Number.isInteger(limit))
@@ -192,9 +197,10 @@ class IpPanel {
       console.log(error.toJSON());
     }
   }
-  async sendSmsWithPattern(patternCode, number, objVariable) {
+  async sendSmsWithPattern(number, objVariable) {
     try {
       const { endPoint } = this._endPoints.sendPattern;
+      const { _pattern: patternCode } = this;
       if (!patternCode) throw "Enter the pattern code";
       if (!number) throw "Enter the number";
       if (typeof patternCode !== "string" || typeof number !== "string") return;
