@@ -66,6 +66,7 @@ const router = require("express").Router();
  *                example: 500
  */
 router.post("/get-otp", authController.getOtpCode);
+router.post("/verify-otp", authController.verifyOtpCode);
 module.exports = {
   authRoutes: router,
 };

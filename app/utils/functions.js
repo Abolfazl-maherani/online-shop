@@ -1,3 +1,8 @@
+const createHttpError = require("http-errors");
+const jwt = require("jsonwebtoken");
+const { token } = require("morgan");
+const { SIGN_JWT } = require("./constatn");
+const { errorMessage } = require("./errors");
 const generateRandomOtp = (length = 5) => {
   const min = Math.pow(10, length - 1);
   const max = Math.pow(10, length);
@@ -29,10 +34,27 @@ const resSuccess = (message = null, status = 200) => {
     success: true,
   };
 };
+function signJwt(payload, sign = undefined) {
+  return new Promise((resolve, reject) => {
+    sign = sign ? sign : SIGN_JWT;
+    console.log("sign", sign);
+    const options = {
+      expiresIn: "1h",
+    };
+    jwt.sign(payload, sign, options, (err, token) => {
+      if (err)
+        reject(
+          createHttpError.InternalServerError(errorMessage.internalMessage)
+        );
+      resolve(token);
+    });
+  });
+}
 module.exports = {
   generateRandomOtp,
   expireAfterMinutes,
   normalizePhone,
   phoneIsValid,
   resSuccess,
+  signJwt,
 };
