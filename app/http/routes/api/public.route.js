@@ -1,4 +1,5 @@
 const publicController = require("../../controller/api/public.controller");
+const verifyToken = require("../../middleware/verifyToken");
 const router = require("express").Router();
 /**
  * @swagger
@@ -13,6 +14,6 @@ const router = require("express").Router();
  *       404:
  *         description: Returns an error object key in json
  */
-router.get("/", publicController.indexController);
+router.get("/", verifyToken, publicController.indexController);
 
 module.exports = { publicRoute: router };

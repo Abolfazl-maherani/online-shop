@@ -50,6 +50,7 @@ function signJwt(payload, sign = undefined) {
     });
   });
 }
+
 module.exports = {
   generateRandomOtp,
   expireAfterMinutes,

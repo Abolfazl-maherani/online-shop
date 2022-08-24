@@ -86,7 +86,7 @@ class AuthController extends Controller {
       );
 
       if (!result) throw createHttpError.BadRequest(errorMessage.notVerifyOtp);
-      const token = await signJwt({ phone: result.phone, userId: result._id });
+      const token = await signJwt({ phone: result.phone });
       res.status(201).json({
         ...resSuccess("باموفقیت لاگین شدید", 201),
         data: {
@@ -98,5 +98,6 @@ class AuthController extends Controller {
       next(error);
     }
   }
+  async refreshTokent(req, res, next) {}
 }
 module.exports = new AuthController();

@@ -67,6 +67,7 @@ const router = require("express").Router();
  */
 router.post("/get-otp", authController.getOtpCode);
 router.post("/verify-otp", authController.verifyOtpCode);
+router.post("/refresh-token", authController.refreshTokent);
 module.exports = {
   authRoutes: router,
 };
