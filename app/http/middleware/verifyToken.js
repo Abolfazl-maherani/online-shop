@@ -11,9 +11,13 @@ const verifyToken = async (req, res, next) => {
     const [bearer, token] = authorization.split(" ");
     if (bearer.toLowerCase() !== "bearer" && !token)
       throw createHttpError.Unauthorized(errorMessage.unAuthorization);
-    const payload = jwt.verify(token, SIGN_JWT);
-    if (!payload)
-      throw createHttpError.Unauthorized(errorMessage.unAuthorization);
+
+    let payload = null;
+    jwt.verify(token, SIGN_JWT, (err, decode) => {
+      if (err) throw createHttpError.Unauthorized(errorMessage.unAuthorization);
+      payload = decode;
+    });
+
     const { phone } = payload;
     const user = await userModel.findOne(
       { phone },

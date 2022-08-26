@@ -1,7 +1,7 @@
 const createHttpError = require("http-errors");
 const jwt = require("jsonwebtoken");
 const { token } = require("morgan");
-const { SIGN_JWT } = require("./constatn");
+const { SIGN_JWT, REFRESH_JWT } = require("./constatn");
 const { errorMessage } = require("./errors");
 const generateRandomOtp = (length = 5) => {
   const min = Math.pow(10, length - 1);
@@ -50,7 +50,30 @@ function signJwt(payload, sign = undefined) {
     });
   });
 }
-
+function signRefreshJwt(payload, sign = undefined) {
+  return new Promise((resolve, reject) => {
+    sign = sign ? sign : REFRESH_JWT;
+    const options = {
+      expiresIn: "1y",
+    };
+    jwt.sign(payload, sign, options, (err, token) => {
+      if (err) {
+        reject(
+          createHttpError.InternalServerError(errorMessage.internalMessage)
+        );
+      }
+      resolve(token);
+    });
+  });
+}
+function verifyRefreshJwt(token) {
+  let payload = null;
+  jwt.verify(token, REFRESH_JWT, (err, decode) => {
+    if (err) throw createHttpError.Unauthorized(errorMessage.unAuthorization);
+    payload = decode;
+  });
+  return payload;
+}
 module.exports = {
   generateRandomOtp,
   expireAfterMinutes,
@@ -58,4 +81,6 @@ module.exports = {
   phoneIsValid,
   resSuccess,
   signJwt,
+  signRefreshJwt,
+  verifyRefreshJwt,
 };

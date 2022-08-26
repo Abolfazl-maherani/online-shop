@@ -13,6 +13,8 @@ const {
   resSuccess,
   normalizePhone,
   signJwt,
+  signRefreshJwt,
+  verifyRefreshJwt,
 } = require("../../../utils/functions");
 
 const Controller = require("../Controller");
@@ -87,17 +89,45 @@ class AuthController extends Controller {
 
       if (!result) throw createHttpError.BadRequest(errorMessage.notVerifyOtp);
       const token = await signJwt({ phone: result.phone });
+      const refreshToken = await signRefreshJwt({ phone: result.phone });
       res.status(201).json({
         ...resSuccess("باموفقیت لاگین شدید", 201),
         data: {
           ...result.toObject(),
         },
         token,
+        refreshToken,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+  async refreshTokent(req, res, next) {
+    try {
+      const { refreshToken } = req.body || {};
+
+      if (!refreshToken)
+        throw createHttpError.BadRequest(errorMessage.refreshTokenBadRequest);
+      const { phone } = verifyRefreshJwt(refreshToken);
+      const result = await userModel.findOne(
+        { phone },
+        { password: 0, otp: 0, __v: 0 }
+      );
+
+      if (!result)
+        throw createHttpError.Unauthorized(errorMessage.unAuthorization);
+
+      const token = await signJwt({ phone: result.phone });
+      const newRefreshToken = await signRefreshJwt({ phone: result.phone });
+      res.json({
+        ...resSuccess(),
+        token,
+        refreshToken: newRefreshToken,
       });
     } catch (error) {
       next(error);
     }
   }
-  async refreshTokent(req, res, next) {}
 }
 module.exports = new AuthController();
