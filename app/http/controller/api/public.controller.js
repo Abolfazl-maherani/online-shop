@@ -1,3 +1,4 @@
+const { redisClient } = require("../../../server");
 const Controller = require("../Controller");
 
 module.exports = new (class PublicController extends Controller {

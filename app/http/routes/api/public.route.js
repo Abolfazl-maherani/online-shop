@@ -14,6 +14,6 @@ const router = require("express").Router();
  *       404:
  *         description: Returns an error object key in json
  */
-router.get("/", verifyToken, publicController.indexController);
+router.get("/", publicController.indexController);
 
 module.exports = { publicRoute: router };

@@ -4,11 +4,13 @@ const createError = require("http-errors");
 const app = express(express);
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsDoc = require("swagger-jsdoc");
+const redisClient = require("redis").createClient();
 
 class Server {
   constructor(dbUri) {
     this.configApp();
     this.configDatabase(dbUri);
+    this.configRedis();
     this.configRoutes();
     this.configErrorHandler();
     this.configServerListener();
@@ -94,11 +96,22 @@ class Server {
       });
     });
   }
-
+  configRedis() {
+    redisClient.connect();
+    redisClient.on("connect", () => {
+      console.log("connected redis");
+    });
+    redisClient.on("error", () => {
+      client.disconnect();
+      console.log("error redis");
+    });
+    module.exports.redisClient = redisClient;
+  }
   #notFind() {
     app.use((req, res, next) =>
       next(createError.NotFound("صفحه مورد نظر پیدا نشد"))
     );
   }
 }
+module.exports.redisClient = redisClient;
 module.exports = Server;
