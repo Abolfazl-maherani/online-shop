@@ -99,10 +99,11 @@ class Server {
   configRedis() {
     redisClient.connect();
     redisClient.on("connect", () => {
-      console.log("connected redis");
+      console.log("connect redis");
     });
+    redisClient.on("ready", () => console.log("redis is ready"));
     redisClient.on("error", () => {
-      client.disconnect();
+      redisClient.disconnect();
       console.log("error redis");
     });
     module.exports.redisClient = redisClient;

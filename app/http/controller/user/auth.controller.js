@@ -20,6 +20,7 @@ const {
 const Controller = require("../Controller");
 const { errorMessage } = require("../../../utils/errors");
 const { checkExistInDb } = require("../../../utils/query");
+const { redisClient } = require("../../../server");
 class AuthController extends Controller {
   async getOtpCode(req, res, next) {
     try {
@@ -89,7 +90,10 @@ class AuthController extends Controller {
 
       if (!result) throw createHttpError.BadRequest(errorMessage.notVerifyOtp);
       const token = await signJwt({ phone: result.phone });
-      const refreshToken = await signRefreshJwt({ phone: result.phone });
+      const refreshToken = await signRefreshJwt({
+        phone: result.phone,
+        userId: result._id,
+      });
       res.status(201).json({
         ...resSuccess("باموفقیت لاگین شدید", 201),
         data: {
@@ -110,16 +114,22 @@ class AuthController extends Controller {
       if (!refreshToken)
         throw createHttpError.BadRequest(errorMessage.refreshTokenBadRequest);
       const { phone } = verifyRefreshJwt(refreshToken);
+
       const result = await userModel.findOne(
         { phone },
         { password: 0, otp: 0, __v: 0 }
       );
-
       if (!result)
         throw createHttpError.Unauthorized(errorMessage.unAuthorization);
-
+      const isTokenInRedis = await redisClient.get(result?._id.toString());
+      console.log(isTokenInRedis);
+      if (isTokenInRedis !== refreshToken)
+        throw createHttpError.Unauthorized(errorMessage.unAuthorization);
       const token = await signJwt({ phone: result.phone });
-      const newRefreshToken = await signRefreshJwt({ phone: result.phone });
+      const newRefreshToken = await signRefreshJwt({
+        phone: result.phone,
+        userId: result._id,
+      });
       res.json({
         ...resSuccess(),
         token,

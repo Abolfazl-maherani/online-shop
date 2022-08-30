@@ -1,6 +1,7 @@
 const createHttpError = require("http-errors");
 const jwt = require("jsonwebtoken");
 const { token } = require("morgan");
+const { redisClient } = require("../server");
 const { SIGN_JWT, REFRESH_JWT } = require("./constatn");
 const { errorMessage } = require("./errors");
 const generateRandomOtp = (length = 5) => {
@@ -56,18 +57,26 @@ function signRefreshJwt(payload, sign = undefined) {
     const options = {
       expiresIn: "1y",
     };
-    jwt.sign(payload, sign, options, (err, token) => {
+    const { userId } = payload;
+    delete payload.userId;
+    jwt.sign(payload, sign, options, async (err, token) => {
       if (err) {
         reject(
           createHttpError.InternalServerError(errorMessage.internalMessage)
         );
       }
+
+      await redisClient.set(userId.toString(), token, {
+        EX: 365 * 24 * 60 * 60,
+      });
+
       resolve(token);
     });
   });
 }
 function verifyRefreshJwt(token) {
   let payload = null;
+
   jwt.verify(token, REFRESH_JWT, (err, decode) => {
     if (err) throw createHttpError.Unauthorized(errorMessage.unAuthorization);
     payload = decode;
