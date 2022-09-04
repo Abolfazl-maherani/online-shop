@@ -1,4 +1,4 @@
-const authController = require("../../controller/user/auth.controller");
+const authController = require("../../controller/user/Auth.controller");
 
 const router = require("express").Router();
 /**
@@ -40,11 +40,10 @@ const router = require("express").Router();
  *                example: null
  *
  *       400:
- *         description: "Phone is incorrect"
+ *         description: "phone is incorrect"
  *         schema:
  *           type: object
  *           properties:
- *            properties:
  *             success:
  *               description: Is Unsuccess
  *               type: boolean
@@ -52,7 +51,7 @@ const router = require("express").Router();
  *             message:
  *                description: desctption process
  *                type: String
- *                example: "شماره همراه وارد شده اشتباه است"
+ *                example: "شماره همراه صحیح نیست"
  *             status:
  *                description: "status process"
  *                type: Number
@@ -62,7 +61,6 @@ const router = require("express").Router();
  *         schema:
  *           type: object
  *           properties:
- *            properties:
  *             success:
  *               description: Unsuccessful
  *               type: boolean
@@ -123,11 +121,10 @@ router.post("/get-otp", authController.getOtpCode);
  *                example: null
  *
  *       400:
- *         description: "Phone is incorrect"
+ *         description: "RefreshToken is incorrect"
  *         schema:
  *           type: object
  *           properties:
- *            properties:
  *             success:
  *               description: Is Unsuccess
  *               type: boolean
@@ -145,7 +142,6 @@ router.post("/get-otp", authController.getOtpCode);
  *         schema:
  *           type: object
  *           properties:
- *            properties:
  *             success:
  *               description: Unsuccessful
  *               type: boolean
@@ -160,6 +156,86 @@ router.post("/get-otp", authController.getOtpCode);
  *                example: 500
  */
 router.post("/verify-otp", authController.verifyOtpCode);
+
+/**
+ * @swagger
+ * "/user/refresh-token":
+ *   post:
+ *     tags: [Auth]
+ *     summary: "Refresh token system"
+ *     consumes: [application/json]
+ *     produces: [application/json]
+ *     parameters:
+ *       - name: refreshToken
+ *         description: Refresh Token for get access token
+ *         in: body
+ *         required: true
+ *         type: string
+ *         example: {"refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6IjkwMzIyNzE5MzYiLCJpYXQiOjE2NjE4OTQzNjEsImV4cCI6MTY5MzQ1MTk2MX0.43fQpk32aiI7L4Fuj_JCLaFZLwk1aMUjQtOVfW8O7kM"}
+ *
+ *     responses:
+ *       200:
+ *         description: "Get access token with refresh token"
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               description: Is succesed
+ *               type: boolean
+ *               example: true
+ *             message:
+ *                description: desctption process
+ *                type: String
+ *                example: درخواست شما موفقیت آمیز بود
+ *             status:
+ *                description: "status process"
+ *                type: Number
+ *                example: 200
+ *             data:
+ *                description: "this field is fix for all success response"
+ *                type: object
+ *                example:
+ *                 accessToken:
+ *                    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6IjkwMzIyNzE5MzYiLCJpYXQiOjE2NjE4OTQzNjEsImV4cCI6MTY5MzQ1MTk2MX0.43fQpk32aiI7L4Fuj_JCLaFZLwk1aMUjQtOVfW8O7kM
+ *                 refreshToken:
+ *                    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6IjkwMzIyNzE5MzYiLCJpYXQiOjE2NjE4OTQzNjEsImV4cCI6MTY5MzQ1MTk2MX0.43fQpk32aiI7L4Fuj_JCLaFZLwk1aMUjQtOVfW8O7kM
+ *
+ *
+ *       400:
+ *         description: "RefreshToken is incorrect"
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               description: Is Unsuccess
+ *               type: boolean
+ *               example: false
+ *             message:
+ *                description: desctption process
+ *                type: String
+ *                example: "رفرش توکن  صحیح نیست"
+ *             status:
+ *                description: "status process"
+ *                type: Number
+ *                example: 400
+ *       500:
+ *         description: "internal server (do not send sms to number)"
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               description: Unsuccessful
+ *               type: boolean
+ *               example: false
+ *             message:
+ *                description: desctption process
+ *                type: String
+ *                example: "خطای ناشناخته سرور"
+ *             status:
+ *                description: "status process"
+ *                type: Number
+ *                example: 500
+ */
 router.post("/refresh-token", authController.refreshTokent);
 module.exports = {
   authRoutes: router,

@@ -6,7 +6,7 @@ const {
 const createHttpError = require("http-errors");
 
 const { userModel } = require("../../../models/users.model");
-const { ipPanel } = require("../../../settings");
+const { ipPanel } = require("../../../utils/api/IpPanelApi");
 const {
   generateRandomOtp,
   expireAfterMinutes,
@@ -22,6 +22,9 @@ const { errorMessage } = require("../../../utils/errors");
 const { checkExistInDb } = require("../../../utils/query");
 const { redisClient } = require("../../../server");
 class AuthController extends Controller {
+  constructor() {
+    super();
+  }
   async getOtpCode(req, res, next) {
     try {
       let { phone } = req.body;
@@ -132,8 +135,10 @@ class AuthController extends Controller {
       });
       res.json({
         ...resSuccess(),
-        token,
-        refreshToken: newRefreshToken,
+        data: {
+          token,
+          refreshToken: newRefreshToken,
+        },
       });
     } catch (error) {
       next(error);

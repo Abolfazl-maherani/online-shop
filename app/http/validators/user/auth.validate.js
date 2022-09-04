@@ -8,7 +8,7 @@ const common = {
     .pattern(/^(98|\+98|0)?9[0-9]{9}$/)
     .error(createError.BadRequest("شماره همراه اشتباه است")),
 };
-const getOtpValidate = Joi.object().keys({
+const getOtpValidate = Joi.object({
   ...common,
 });
 const verifyOtpValidate = Joi.object({

@@ -62,12 +62,12 @@ class IpPanel {
         method: "get",
       },
     };
-    endPoint.__proto__.replaceParam = function (prop, ...params) {
-      if (!(prop in endPoint)) return;
+    endPoint.replaceParam = function (prop, ...params) {
+      if (!(prop in this)) return;
 
       if (typeof prop !== "string") return;
       prop = prop.trim();
-      const obj = endPoint[prop];
+      const obj = this[prop];
 
       if (!obj.hasOwnProperty("setParam")) return obj.endPoint;
       let index = 0;
@@ -81,7 +81,7 @@ class IpPanel {
 
       return endpointUrl;
     };
-    return endPoint;
+    return this;
   }
   setPttern(pattern) {
     if (!pattern || typeof pattern !== "string")
@@ -218,5 +218,6 @@ class IpPanel {
     }
   }
 }
-
-module.exports = IpPanel;
+const ipPanel = new IpPanel(process.env.API_KEY_SMS);
+ipPanel.setPttern("9m68xwmh9hb85ko");
+module.exports = ipPanel;
