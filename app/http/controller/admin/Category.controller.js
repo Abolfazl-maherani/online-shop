@@ -1,4 +1,5 @@
 const createHttpError = require("http-errors");
+const { default: mongoose } = require("mongoose");
 const { categoryModel } = require("../../../models/categories.model");
 const { errorMessage } = require("../../../utils/errors");
 const { resSuccess } = require("../../../utils/functions");
@@ -6,8 +7,7 @@ const {
   addCategoryValidate,
 } = require("../../validators/admin/category.validate");
 const Controller = require("../Controller");
-console.log(addCategoryValidate);
-addCategoryValidate;
+
 // getOtpValidate
 class Category extends Controller {
   constructor() {
@@ -25,7 +25,7 @@ class Category extends Controller {
       const result = await categoryModel.create(doc);
       if (!result)
         throw createHttpError.InternalServerError(errorMessage.internalMessage);
-      console.log(result);
+
       const statusCode = 201;
       return res.status(statusCode).json({
         ...resSuccess("فهرست شما ایجاد شد", statusCode),
@@ -34,13 +34,16 @@ class Category extends Controller {
         },
       });
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
   async deleteCategory(req, res, next) {
     try {
-      const { categoryId } = req.body;
-      const result = await categoryModel.deleteOne({ _id: categoryId });
+      const { categoryId } = req.params;
+      const result = await categoryModel.deleteMany({
+        $or: [{ _id: categoryId }, { parent: categoryId }],
+      });
       if (!result.acknowledged && !result.deletedCount)
         throw createHttpError.InternalServerError(errorMessage.internalMessage);
       res.json({
@@ -51,14 +54,103 @@ class Category extends Controller {
       next(error);
     }
   }
+
   editCategory() {}
   async getAllCategory(req, res, next) {
     try {
-      const result = await categoryModel.find({});
+      const result = await categoryModel.aggregate(
+        [
+          {
+            $graphLookup: {
+              from: "categories",
+              startWith: "$_id",
+              connectFromField: "_id",
+              connectToField: "parent",
+              as: "child",
+              depthField: "depthField",
+            },
+          },
+          {
+            $match: {
+              parent: null,
+            },
+          },
+        ],
+        {
+          allowDiskUse: false,
+        }
+      );
       if (!result)
         throw createHttpError.InternalServerError(errorMessage.internalMessage);
 
       res.json({
+        ...resSuccess(),
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getAllParents(req, res, next) {
+    try {
+      const result = await categoryModel.find({ parent: undefined });
+      if (!result)
+        createHttpError.InternalServerError(errorMessage.internalMessage);
+      return res.json({
+        ...resSuccess(),
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getAllChildrenInParent(req, res, next) {
+    try {
+      const { parentId } = req.params;
+      const result = await categoryModel.find({ parent: parentId });
+      if (!result)
+        createHttpError.InternalServerError(errorMessage.internalMessage);
+      return res.json({
+        ...resSuccess(),
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getCategoryById(req, res, next) {
+    try {
+      const { categoryId } = req.params;
+      const result = await categoryModel.aggregate(
+        [
+          {
+            $match: {
+              _id: mongoose.Types.ObjectId(categoryId),
+            },
+          },
+          {
+            $graphLookup: {
+              from: "categories",
+              startWith: "$_id",
+              connectFromField: "_id",
+              connectToField: "parent",
+              as: "child",
+              depthField: "depthField",
+            },
+          },
+          {
+            $match: {
+              parent: null,
+            },
+          },
+        ],
+        {
+          allowDiskUse: false,
+        }
+      );
+      if (!result.length)
+        throw createHttpError.InternalServerError(errorMessage.internalMessage);
+      return res.json({
         ...resSuccess(),
         data: result,
       });

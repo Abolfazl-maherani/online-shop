@@ -1,5 +1,6 @@
 const authController = require("../controller/user/Auth.controller");
-const { adminRoutes } = require("./admin/category.route");
+const { adminRoutes } = require("./admin/admin.route");
+
 const { publicRoute } = require("./api/public.route");
 const { authRoutes } = require("./user/auth");
 const router = require("express").Router();
